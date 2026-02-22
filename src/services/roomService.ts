@@ -1,23 +1,11 @@
 import { logger } from '@/libs/logger';
+import { Room, User } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 
 const log = logger.child({ module: 'rooms' });
 
 const rooms = new Map<string, Room>();
 const userRooms = new Map<string, string>();
-
-interface User {
-	socketId: string;
-	peerId: string;
-	createdAt: Date;
-}
-
-interface Room {
-	id: string;
-	users: Map<string, User>;
-	createdAt: Date;
-	deletedAt: Date | null;
-}
 
 export function createRoom(user: User): { success: true; roomId: string } {
 	const roomId: string = uuidv4();

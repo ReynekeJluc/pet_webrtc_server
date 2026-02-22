@@ -1,7 +1,11 @@
+import 'dotenv/config';
+
 import { logger } from '@/libs/logger';
+import { User } from '@/types';
 import express from 'express';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
+import { createRoom } from './services/roomService';
 
 const app = express();
 const port = process.env.API_PORT || 5000;
@@ -22,6 +26,20 @@ app.get('/', (req: any, res: any) => {
 io.on('connection', socket => {
 	const log = logger.child({ socketId: socket.id });
 	log.info('Connected');
+
+	socket.on('create-room', callback => {
+		const user: User = {
+			socketId: socket.id,
+			createdAt: new Date(),
+		};
+
+		const res = createRoom(user);
+
+		if (res.success) {
+			socket.join(res.roomId);
+			callback({ success: true, roomId: res.roomId });
+		}
+	});
 
 	socket.on('disconnect', () => {
 		log.info('Disconnected');
