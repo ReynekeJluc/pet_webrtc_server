@@ -4,11 +4,11 @@ import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 
 const app = express();
-const port = 5000;
+const port = process.env.API_PORT || 5000;
 const server = createServer(app);
 const io = new Server(server, {
 	cors: {
-		origin: 'http://localhost:3000',
+		origin: process.env.CLIENT_URL,
 		methods: ['GET', 'POST'],
 	},
 });

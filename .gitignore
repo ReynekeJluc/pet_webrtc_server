@@ -7,6 +7,9 @@ lib-cov
 *.pid
 *.gz
 
+.env
+.env.local
+
 pids
 logs
 results
