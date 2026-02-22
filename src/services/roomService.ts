@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/libs/logger';
 import { v4 as uuidv4 } from 'uuid';
 
 const log = logger.child({ module: 'rooms' });

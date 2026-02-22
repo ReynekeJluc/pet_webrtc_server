@@ -1,6 +1,6 @@
+import { logger } from '@/libs/logger';
 import express from 'express';
 import { createServer } from 'node:http';
-import pino from 'pino';
 import { Server } from 'socket.io';
 
 const app = express();
@@ -10,15 +10,6 @@ const io = new Server(server, {
 	cors: {
 		origin: 'http://localhost:3000',
 		methods: ['GET', 'POST'],
-	},
-});
-
-export const logger = pino({
-	transport: {
-		target: 'pino-pretty',
-		options: {
-			colorize: true,
-		},
 	},
 });
 
