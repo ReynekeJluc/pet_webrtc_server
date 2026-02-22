@@ -1,5 +1,6 @@
 import express from 'express';
 import { createServer } from 'node:http';
+import pino from 'pino';
 import { Server } from 'socket.io';
 
 const app = express();
@@ -12,18 +13,30 @@ const io = new Server(server, {
 	},
 });
 
+export const logger = pino({
+	transport: {
+		target: 'pino-pretty',
+		options: {
+			colorize: true,
+		},
+	},
+});
+
+logger.info('logger worked!');
+
 app.get('/', (req: any, res: any) => {
 	res.send('Hello World!');
 });
 
 io.on('connection', socket => {
-	console.log('User connected:', socket.id);
+	const log = logger.child({ socketId: socket.id });
+	log.info('Connected');
 
 	socket.on('disconnect', () => {
-		console.log('User disconnected:', socket.id);
+		log.info('Disconnected');
 	});
 });
 
 server.listen(port, () => {
-	console.log(`Example app listening on port ${port}`);
+	logger.info(`app start listening on port ${port}`);
 });
