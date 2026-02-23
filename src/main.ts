@@ -1,11 +1,12 @@
 import 'dotenv/config';
 
 import { logger } from '@/libs/logger';
+import { userRooms } from '@/states';
 import { User } from '@/types';
 import express from 'express';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
-import { createRoom, leaveRoom, userRooms } from './services/roomService';
+import { createRoom, leaveRoom } from './services/roomService';
 
 const app = express();
 const port = process.env.API_PORT || 5000;
@@ -41,10 +42,21 @@ io.on('connection', socket => {
 		}
 	});
 
-	socket.on('disconnect', () => {
-		log.info('Disconnected');
-
+	socket.on('leave-room', callback => {
 		const roomId = userRooms.get(socket.id);
+
+		log.info({ roomId }, `Leave room`);
+		if (roomId) {
+			leaveRoom(user, roomId);
+			socket.leave(roomId);
+			callback({ success: true });
+		}
+	});
+
+	socket.on('disconnect', () => {
+		const roomId = userRooms.get(socket.id);
+
+		log.info('Disconnected');
 		if (roomId) {
 			leaveRoom(user, roomId);
 			socket.to(roomId).emit('peer-disconnected', socket.id);
