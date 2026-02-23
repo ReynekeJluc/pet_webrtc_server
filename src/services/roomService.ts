@@ -4,8 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 const log = logger.child({ module: 'rooms' });
 
-const rooms = new Map<string, Room>();
-const userRooms = new Map<string, string>();
+export const rooms = new Map<string, Room>();
+export const userRooms = new Map<string, string>();
 
 export function createRoom(user: User): { success: true; roomId: string } {
 	const roomId: string = uuidv4();
@@ -52,7 +52,7 @@ export function joinRoom(
 	room.users.set(user.socketId, user);
 
 	log.info(
-		{ roomId, userSocketId: user.socketId },
+		{ roomId, userSocketId: user.socketId, userRooms },
 		'Пользователь присоединился',
 	);
 
