@@ -33,14 +33,35 @@ export function joinRoom(
 		log.warn({ roomId }, 'The room not found');
 		return { success: false, error: 'The room not found' };
 	}
-	if (room.users.size >= 4) {
+	if (room.users.size >= 4 && !room.users.has(user.socketId)) {
 		log.warn({ roomId }, 'There are too many users');
 		return { success: false, error: 'There are too many users' };
 	}
 	if (userRooms.has(user.socketId)) {
 		const existingRoomId = userRooms.get(user.socketId);
-		log.warn({ roomId, existingRoomId }, 'The user is already in the room');
-		return { success: false, error: 'The user is already in the room' };
+		if (existingRoomId !== roomId) {
+			log.warn(
+				{
+					roomId,
+					existingRoomId,
+					users: Array.from(rooms.get(roomId)?.users.keys() ?? []),
+				},
+				'The user is already in the room',
+			);
+			return { success: false, error: 'The user is already in the room' };
+		} else {
+			log.info(
+				{
+					roomId,
+					existingRoomId,
+					users: Array.from(rooms.get(roomId)?.users.keys() ?? []),
+				},
+				'User already in this room',
+			);
+			return {
+				success: true,
+			};
+		}
 	}
 
 	userRooms.set(user.socketId, roomId);
