@@ -67,6 +67,23 @@ io.on('connection', socket => {
 		}
 	});
 
+	socket.on(
+		'relay-sdp',
+		(data: {
+			targetSocketId: string;
+			sdp: {
+				type: string;
+				sdp: string;
+			};
+		}) => {
+			log.info({ targetId: data.targetSocketId }, 'Отправка SDP');
+			io.to(data.targetSocketId).emit('sdp-received', {
+				fromSocketId: socket.id,
+				sdp: data.sdp,
+			});
+		},
+	);
+
 	socket.on('check-room', (data: { roomId: string }, callback) => {
 		const room = rooms.get(data.roomId);
 		if (room) {
