@@ -57,7 +57,7 @@ io.on('connection', socket => {
 				const existingParticipants = Array.from(room.users.keys()).filter(
 					id => id !== socket.id,
 				);
-				existingParticipants.push(socket.id);
+				// existingParticipants.push(socket.id);
 				socket.emit('existing-participants', existingParticipants);
 			}
 
