@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const log = logger.child({ module: 'rooms' });
 
-export function createRoom(user: User): { success: true; roomId: string } {
+export function createRoom(): { success: true; roomId: string } {
 	const roomId: string = uuidv4();
 
 	const room: Room = {
@@ -15,11 +15,11 @@ export function createRoom(user: User): { success: true; roomId: string } {
 		deletedAt: null,
 	};
 
-	room.users.set(user.socketId, user);
-	userRooms.set(user.socketId, roomId);
+	// room.users.set(user.socketId, user);
+	// userRooms.set(user.socketId, roomId);
 	rooms.set(roomId, room);
 
-	log.info({ roomId, userSocketId: user.socketId }, `User created room`);
+	log.info({ roomId }, `User created room`);
 
 	return { success: true, roomId: roomId };
 }
@@ -47,7 +47,11 @@ export function joinRoom(
 	room.users.set(user.socketId, user);
 
 	log.info(
-		{ roomId, userSocketId: user.socketId, userRooms },
+		{
+			roomId,
+			userSocketId: user.socketId,
+			users: Array.from(rooms.get(roomId)?.users.keys() ?? []),
+		},
 		'The user joined the room',
 	);
 
@@ -67,7 +71,14 @@ export function leaveRoom(
 	room.users.delete(user.socketId);
 	userRooms.delete(user.socketId);
 
-	log.info({ roomId, userSocketId: user.socketId }, `The user left the room`);
+	log.info(
+		{
+			roomId,
+			userSocketId: user.socketId,
+			users: Array.from(rooms.get(roomId)?.users.keys() ?? []),
+		},
+		`The user left the room`,
+	);
 
 	if (room.users.size === 0) {
 		rooms.delete(roomId);

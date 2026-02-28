@@ -1,12 +1,12 @@
 import 'dotenv/config';
 
 import { logger } from '@/libs/logger';
-import { userRooms } from '@/states';
+import { rooms, userRooms } from '@/states';
 import { User } from '@/types';
 import express from 'express';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
-import { createRoom, leaveRoom } from './services/roomService';
+import { createRoom, joinRoom, leaveRoom } from './services/roomService';
 
 const app = express();
 const port = process.env.API_PORT || 5000;
@@ -34,11 +34,44 @@ io.on('connection', socket => {
 	log.info('Connected');
 
 	socket.on('create-room', callback => {
-		const res = createRoom(user);
+		const res = createRoom();
 
 		if (res.success) {
-			socket.join(res.roomId);
+			// socket.join(res.roomId);
 			callback({ success: true, roomId: res.roomId });
+		}
+	});
+
+	socket.on('join-room', (data, callback) => {
+		const res = joinRoom(user, data.roomId);
+
+		if (res.success) {
+			socket.join(data.roomId);
+
+			socket.to(data.roomId).emit('peer-joined', {
+				socketId: socket.id,
+			});
+
+			const room = rooms.get(data.roomId);
+			if (room) {
+				const existingParticipants = Array.from(room.users.keys()).filter(
+					id => id !== socket.id,
+				);
+				socket.emit('existing-participants', existingParticipants);
+			}
+
+			callback({ success: true });
+		} else {
+			callback({ success: false, error: res.error });
+		}
+	});
+
+	socket.on('check-room', (data: { roomId: string }, callback) => {
+		const room = rooms.get(data.roomId);
+		if (room) {
+			callback({ success: true });
+		} else {
+			callback({ success: false });
 		}
 	});
 
@@ -49,7 +82,11 @@ io.on('connection', socket => {
 		if (roomId) {
 			leaveRoom(user, roomId);
 			socket.leave(roomId);
+			socket.to(roomId).emit('peer-disconnected', socket.id);
 			callback({ success: true });
+		} else {
+			log.warn({ socketId: socket.id }, 'Room not found for user');
+			callback({ success: false, error: 'Room not found' });
 		}
 	});
 
