@@ -58,7 +58,9 @@ io.on('connection', socket => {
 					id => id !== socket.id,
 				);
 				// existingParticipants.push(socket.id);
-				socket.emit('existing-participants', existingParticipants);
+				socket.emit('existing-participants', {
+					participantIds: existingParticipants,
+				});
 			}
 
 			callback({ success: true });
@@ -83,6 +85,14 @@ io.on('connection', socket => {
 			});
 		},
 	);
+
+	socket.on('relay-ice', (data: { targetSocketId: string; candidate: any }) => {
+		log.info({ targetId: data.targetSocketId }, 'Отправка ICE');
+		io.to(data.targetSocketId).emit('ice-received', {
+			fromSocketId: socket.id,
+			candidate: data.candidate,
+		});
+	});
 
 	socket.on('check-room', (data: { roomId: string }, callback) => {
 		const room = rooms.get(data.roomId);
