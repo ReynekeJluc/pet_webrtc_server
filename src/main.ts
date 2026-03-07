@@ -27,6 +27,7 @@ app.get('/', (req: any, res: any) => {
 io.on('connection', socket => {
 	const user: User = {
 		socketId: socket.id,
+		nickname: '',
 		createdAt: new Date(),
 	};
 
@@ -43,6 +44,8 @@ io.on('connection', socket => {
 	});
 
 	socket.on('join-room', (data, callback) => {
+		user.nickname = data.nickname;
+
 		const res = joinRoom(user, data.roomId);
 
 		if (res.success) {
@@ -50,6 +53,7 @@ io.on('connection', socket => {
 
 			socket.to(data.roomId).emit('peer-joined', {
 				socketId: socket.id,
+				nickname: data.nick, //! добавь обработку
 			});
 
 			const room = rooms.get(data.roomId);
@@ -78,7 +82,7 @@ io.on('connection', socket => {
 				sdp: string;
 			};
 		}) => {
-			log.info({ targetId: data.targetSocketId }, 'Отправка SDP');
+			log.info({ targetId: data.targetSocketId }, 'sending SDP');
 			io.to(data.targetSocketId).emit('sdp-received', {
 				fromSocketId: socket.id,
 				sdp: data.sdp,
@@ -87,7 +91,7 @@ io.on('connection', socket => {
 	);
 
 	socket.on('relay-ice', (data: { targetSocketId: string; candidate: any }) => {
-		log.info({ targetId: data.targetSocketId }, 'Отправка ICE');
+		log.info({ targetId: data.targetSocketId }, 'sending ICE');
 		io.to(data.targetSocketId).emit('ice-received', {
 			fromSocketId: socket.id,
 			candidate: data.candidate,
