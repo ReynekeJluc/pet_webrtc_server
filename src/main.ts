@@ -53,17 +53,20 @@ io.on('connection', socket => {
 
 			socket.to(data.roomId).emit('peer-joined', {
 				socketId: socket.id,
-				nickname: data.nick, //! добавь обработку
+				nickname: data.nickname,
 			});
 
 			const room = rooms.get(data.roomId);
 			if (room) {
-				const existingParticipants = Array.from(room.users.keys()).filter(
-					id => id !== socket.id,
-				);
+				const existingParticipants = Array.from(room.users.values())
+					.filter(u => u.socketId !== socket.id)
+					.map(u => ({
+						socketId: u.socketId,
+						nickname: u.nickname,
+					}));
 				// existingParticipants.push(socket.id);
 				socket.emit('existing-participants', {
-					participantIds: existingParticipants,
+					participants: existingParticipants,
 				});
 			}
 
