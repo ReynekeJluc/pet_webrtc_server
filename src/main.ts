@@ -32,7 +32,7 @@ io.on('connection', socket => {
 	};
 
 	const log = logger.child({ socketId: socket.id });
-	log.info('Connected');
+	log.info('User connected');
 
 	socket.on('create-room', callback => {
 		const res = createRoom();
@@ -65,6 +65,11 @@ io.on('connection', socket => {
 						nickname: u.nickname,
 					}));
 				// existingParticipants.push(socket.id);
+
+				log.info(
+					{ participants: existingParticipants },
+					'existing participants',
+				);
 				socket.emit('existing-participants', {
 					participants: existingParticipants,
 				});
@@ -85,7 +90,10 @@ io.on('connection', socket => {
 				sdp: string;
 			};
 		}) => {
-			log.info({ targetId: data.targetSocketId }, 'sending SDP');
+			log.info(
+				{ targetId: data.targetSocketId, sdpType: data.sdp.type },
+				'sending SDP',
+			);
 			io.to(data.targetSocketId).emit('sdp-received', {
 				fromSocketId: socket.id,
 				sdp: data.sdp,
