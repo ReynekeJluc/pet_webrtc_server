@@ -51,11 +51,6 @@ io.on('connection', socket => {
 		if (res.success) {
 			socket.join(data.roomId);
 
-			socket.to(data.roomId).emit('peer-joined', {
-				socketId: socket.id,
-				nickname: data.nickname,
-			});
-
 			const room = rooms.get(data.roomId);
 			if (room) {
 				const existingParticipants = Array.from(room.users.values())
@@ -74,6 +69,11 @@ io.on('connection', socket => {
 					participants: existingParticipants,
 				});
 			}
+
+			socket.to(data.roomId).emit('peer-joined', {
+				socketId: socket.id,
+				nickname: data.nickname,
+			});
 
 			callback({ success: true });
 		} else {
