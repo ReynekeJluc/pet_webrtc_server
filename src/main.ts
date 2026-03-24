@@ -3,7 +3,7 @@ import 'dotenv/config';
 import { logger } from '@/libs/logger';
 import { rooms, userRooms } from '@/states';
 import { User } from '@/types';
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import { createRoom, joinRoom, leaveRoom } from './services/roomService';
@@ -11,7 +11,7 @@ import { createRoom, joinRoom, leaveRoom } from './services/roomService';
 const app = express();
 const port = Number(process.env.PORT) || 5000;
 const server = createServer(app);
-const allowedOrigin = process.env.CLIENT_URL;
+// const allowedOrigin = process.env.CLIENT_URL;
 const io = new Server(server, {
 	cors: {
 		origin: '*',
@@ -22,7 +22,7 @@ const io = new Server(server, {
 
 logger.info('logger worked!');
 
-app.get('/', (req: any, res: any) => {
+app.get('/', (_req: Request, res: Response) => {
 	res.send('Hello World!');
 });
 
