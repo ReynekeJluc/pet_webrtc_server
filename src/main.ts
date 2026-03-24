@@ -9,12 +9,14 @@ import { Server } from 'socket.io';
 import { createRoom, joinRoom, leaveRoom } from './services/roomService';
 
 const app = express();
-const port = process.env.API_PORT || 5000;
+const port = Number(process.env.PORT) || 5000;
 const server = createServer(app);
+const allowedOrigin = process.env.CLIENT_URL;
 const io = new Server(server, {
 	cors: {
-		origin: process.env.CLIENT_URL,
+		origin: '*',
 		methods: ['GET', 'POST'],
+		credentials: true,
 	},
 });
 
@@ -144,6 +146,6 @@ io.on('connection', socket => {
 	});
 });
 
-server.listen(port, () => {
+server.listen(port, '0.0.0.0', () => {
 	logger.info(`app start listening on port ${port}`);
 });
