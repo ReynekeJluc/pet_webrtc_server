@@ -11,10 +11,10 @@ import { createRoom, joinRoom, leaveRoom } from './services/roomService';
 const app = express();
 const port = Number(process.env.PORT) || 5000;
 const server = createServer(app);
-// const allowedOrigin = process.env.CLIENT_URL;
+const allowedOrigin = process.env.CLIENT_URL;
 const io = new Server(server, {
 	cors: {
-		origin: '*',
+		origin: allowedOrigin,
 		methods: ['GET', 'POST'],
 		credentials: true,
 	},
